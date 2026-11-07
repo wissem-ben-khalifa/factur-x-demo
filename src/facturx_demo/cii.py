@@ -78,9 +78,10 @@ def build_cii_xml(inv: Invoice) -> bytes:
     summ.line_total = totals.total_ht
     summ.charge_total = Decimal("0.00")
     summ.allowance_total = Decimal("0.00")
-    summ.tax_basis_total = (totals.total_ht, inv.currency)
+    # EN 16931 (CII-DT-031): currencyID only on TaxTotalAmount, not on the other totals.
+    summ.tax_basis_total = totals.total_ht
     summ.tax_total = (totals.total_vat, inv.currency)
-    summ.grand_total = (totals.total_ttc, inv.currency)
+    summ.grand_total = totals.total_ttc
     summ.due_amount = totals.total_ttc
 
     return doc.serialize(schema="FACTUR-X_EN16931")

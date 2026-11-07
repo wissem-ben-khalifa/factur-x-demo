@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Custom KoSIT scenario: Factur-X EN 16931 CII only (XSD + CEN EN 16931 CII schematron).
+     Not the XRechnung configuration: its BR-DE rules would reject French invoices. -->
+<scenarios xmlns="http://www.xoev.de/de/validator/framework/1/scenarios" frameworkVersion="1.1.2">
+    <name>Factur-X EN 16931 (CII)</name>
+    <author>factur-x-demo</author>
+    <date>2026-11-07</date>
+    <description>
+        <p>Factur-X EN 16931: XML Schema and CEN EN 16931 CII schematron rules.</p>
+    </description>
+
+    <scenario>
+        <name>Factur-X EN 16931 CII</name>
+        <description>
+            <p>CrossIndustryInvoice, guideline urn:cen.eu:en16931:2017</p>
+        </description>
+        <namespace prefix="rsm">urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100</namespace>
+        <match>/rsm:CrossIndustryInvoice</match>
+
+        <validateWithXmlSchema>
+            <resource>
+                <name>Factur-X EN 16931 XSD</name>
+                <location>xsd/Factur-X_EN16931.xsd</location>
+            </resource>
+        </validateWithXmlSchema>
+        <validateWithSchematron>
+            <resource>
+                <name>CEN EN 16931 CII 1.3.17</name>
+                <location>EN16931-CII-validation.xslt</location>
+            </resource>
+        </validateWithSchematron>
+        <createReport>
+            <resource>
+                <name>Identity report</name>
+                <location>report.xsl</location>
+            </resource>
+        </createReport>
+    </scenario>
+
+    <noScenarioReport>
+        <resource>
+            <name>Identity report</name>
+            <location>report.xsl</location>
+        </resource>
+    </noScenarioReport>
+</scenarios>
