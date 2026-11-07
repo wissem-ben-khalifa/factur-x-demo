@@ -10,7 +10,7 @@ from fpdf.output import PDFICCProfile
 from PIL import ImageCms
 
 from facturx_demo.cii import build_cii_xml
-from facturx_demo.model import Invoice, Party, compute_totals
+from facturx_demo.model import DeliveryAddress, Invoice, Party, compute_totals, effective_delivery_address
 
 FONTS = Path(__file__).parent / "fonts"
 FONT = "DejaVu"
@@ -59,6 +59,18 @@ def _party_block(pdf: FPDF, title: str, party: Party, x: float, width: float) ->
         pdf.cell(width, 4.5, line, new_x="LEFT", new_y="NEXT")
 
 
+def _delivery_block(pdf: FPDF, delivery: DeliveryAddress) -> None:
+    pdf.set_font(FONT, "B", 9)
+    pdf.cell(0, 5, "Adresse de livraison", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font(FONT, "", 9)
+    lines = [delivery.name] if delivery.name else []
+    lines += [delivery.street, f"{delivery.postcode} {delivery.city}"]
+    if delivery.country != "FR":
+        lines.append(delivery.country)
+    for line in lines:
+        pdf.cell(0, 4.5, line, new_x="LMARGIN", new_y="NEXT")
+
+
 def render_invoice_pdf(inv: Invoice) -> bytes:
     """Draw the human-readable invoice. Fonts are embedded (needed for PDF/A)."""
     totals = compute_totals(inv)
@@ -98,7 +110,12 @@ def render_invoice_pdf(inv: Invoice) -> bytes:
     after_seller = pdf.get_y()
     pdf.set_y(top)
     _party_block(pdf, "Client", inv.buyer, 110, 90)
-    pdf.set_y(max(after_seller, pdf.get_y()) + 8)
+    pdf.set_y(max(after_seller, pdf.get_y()) + 4)
+    pdf.set_x(10)
+    delivery = effective_delivery_address(inv)
+    if delivery is not None:
+        _delivery_block(pdf, delivery)
+    pdf.ln(4)
 
     # Lines table
     widths = [88, 22, 28, 20, 32]
@@ -130,6 +147,8 @@ def render_invoice_pdf(inv: Invoice) -> bytes:
     pdf.set_font(FONT, "", 9)
     if inv.payment_terms:
         pdf.cell(0, 5, inv.payment_terms, new_x="LMARGIN", new_y="NEXT")
+    if inv.vat_on_debits:
+        pdf.cell(0, 5, "Option pour le paiement de la TVA d’après les débits.", new_x="LMARGIN", new_y="NEXT")
     if inv.notes:
         pdf.ln(3)
         pdf.set_font(FONT, "", 8)

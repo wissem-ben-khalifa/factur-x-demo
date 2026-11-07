@@ -8,9 +8,11 @@ Sources (checked 2026-11-07):
 - French e-invoicing rules BR-FR (Flux 2 schematron V1.3.0, 16 Feb 2026), bundled in Mustang 2.26.0:
   BR-FR-05 (notes PMT, PMD, AAB), BR-FR-10/11 (SIREN), BR-FR-12/13 (electronic addresses),
   BR-FR-CO-07 (due date), BR-FR-16 (allowed VAT rates).
-Not covered yet: delivery address when different, VAT-on-debits option.
+Delivery address (when different) is checked for completeness; the VAT-on-debits option is a
+yes/no choice of the seller, mapped to BT-8 (DGFiP data table + Vertex reference, Nov 2026).
 """
 
+import re
 from decimal import Decimal
 
 from pydantic import BaseModel
@@ -114,6 +116,29 @@ def check_invoice(inv: Invoice) -> list[Issue]:
                 message_en="The buyer's full address (street, postcode, city) is required.",
             )
         )
+
+    delivery = inv.delivery_address
+    if delivery is not None:
+        if any(_blank(v) for v in (delivery.street, delivery.postcode, delivery.city)):
+            issues.append(
+                Issue(
+                    code="FR-DELIVERY-ADDRESS-INCOMPLETE",
+                    field="delivery_address",
+                    message_fr="L’adresse de livraison est incomplète (rue, code postal et ville sont obligatoires). "
+                    "Videz tous les champs si elle est identique à celle de l’acheteur.",
+                    message_en="The delivery address is incomplete (street, postcode and city are required). "
+                    "Clear all the fields if it is the same as the buyer's address.",
+                )
+            )
+        if not re.fullmatch(r"[A-Z]{2}", delivery.country):
+            issues.append(
+                Issue(
+                    code="FR-DELIVERY-COUNTRY-INVALID",
+                    field="delivery_address.country",
+                    message_fr=f"Pays de livraison « {delivery.country} » invalide (code à 2 lettres, par exemple FR).",
+                    message_en=f'Delivery country "{delivery.country}" is invalid (2-letter code, for example FR).',
+                )
+            )
 
     given = {n.code for n in inv.notes if not _blank(n.text)}
     missing_notes = [c for c in REQUIRED_NOTE_CODES if c not in given]

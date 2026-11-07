@@ -6,7 +6,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from facturx_demo.checks import Issue
-from facturx_demo.model import Invoice, InvoiceLine, InvoiceNote, Party
+from facturx_demo.model import DeliveryAddress, Invoice, InvoiceLine, InvoiceNote, Party
 
 LINE_COUNT = 5
 MAX_TEXT = 300
@@ -17,6 +17,7 @@ _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 PARTY_FIELDS = ("name", "siren", "vat_id", "street", "postcode", "city", "endpoint_id")
 LINE_FIELDS = ("description", "quantity", "unit_code", "unit_price", "vat_rate")
+DELIVERY_FIELDS = ("name", "street", "postcode", "city", "country")
 
 DEFAULT_NOTES = {
     "PMT": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
@@ -26,7 +27,12 @@ DEFAULT_NOTES = {
 
 
 def blank_form() -> dict[str, str]:
-    form = {"operation_category": "services", "payment_terms": "Paiement à 30 jours"}
+    form = {
+        "operation_category": "services",
+        "payment_terms": "Paiement à 30 jours",
+        "delivery_country": "FR",
+        "vat_on_debits": "",
+    }
     for i in range(1, LINE_COUNT + 1):
         form[f"line_{i}_unit_code"] = "HUR" if i == 1 else "C62"
         form[f"line_{i}_vat_rate"] = "20"
@@ -45,7 +51,12 @@ def invoice_to_form(inv: Invoice) -> dict[str, str]:
         "delivery_date": inv.delivery_date.isoformat() if inv.delivery_date else "",
         "operation_category": inv.operation_category,
         "payment_terms": inv.payment_terms or "",
+        "vat_on_debits": "on" if inv.vat_on_debits else "",
     }
+    delivery = inv.delivery_address
+    for field in DELIVERY_FIELDS:
+        value = getattr(delivery, field) if delivery else ""
+        form[f"delivery_{field}"] = value or ("FR" if field == "country" else "")
     for side in ("seller", "buyer"):
         party = getattr(inv, side)
         for field in PARTY_FIELDS:
@@ -178,6 +189,18 @@ def parse_form(data: Mapping[str, str]) -> tuple[Invoice | None, list[Issue]]:
             )
         )
 
+    delivery_values = {f: p.text(f"delivery_{f}") for f in DELIVERY_FIELDS}
+    delivery = None
+    if any(delivery_values[f] for f in ("name", "street", "postcode", "city")):
+        delivery = DeliveryAddress(
+            name=delivery_values["name"] or None,
+            street=delivery_values["street"],
+            postcode=delivery_values["postcode"],
+            city=delivery_values["city"],
+            country=(delivery_values["country"] or "FR").upper(),
+        )
+    vat_on_debits = p.text("vat_on_debits").lower() in ("on", "true", "1", "yes")
+
     category = p.text("operation_category") or "services"
     if category not in ("goods", "services", "mixed"):
         p._problem(
@@ -205,5 +228,7 @@ def parse_form(data: Mapping[str, str]) -> tuple[Invoice | None, list[Issue]]:
         operation_category=category,
         payment_terms=p.text("payment_terms") or None,
         notes=notes,
+        delivery_address=delivery,
+        vat_on_debits=vat_on_debits,
     )
     return invoice, p.issues

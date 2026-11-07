@@ -46,6 +46,16 @@ class InvoiceNote(BaseModel):
 REQUIRED_NOTE_CODES = ("PMT", "PMD", "AAB")
 
 
+class DeliveryAddress(BaseModel):
+    """Where the goods are delivered, when different from the buyer's address (BG-13, BG-15)."""
+
+    name: str | None = None
+    street: str
+    postcode: str
+    city: str
+    country: str = "FR"
+
+
 class Invoice(BaseModel):
     number: str
     issue_date: date
@@ -58,6 +68,9 @@ class Invoice(BaseModel):
     operation_category: Literal["goods", "services", "mixed"]
     payment_terms: str | None = None
     notes: list[InvoiceNote] = []
+    delivery_address: DeliveryAddress | None = None
+    # Seller opted to pay VAT on debits: VAT is due when the invoice is issued (BT-8 code 5 in CII).
+    vat_on_debits: bool = False
 
 
 class VatBreakdown(BaseModel):
@@ -72,6 +85,25 @@ class Totals(BaseModel):
     total_ht: Decimal
     total_vat: Decimal
     total_ttc: Decimal
+
+
+def _same(a: str, b: str) -> bool:
+    return " ".join(a.split()).casefold() == " ".join(b.split()).casefold()
+
+
+def effective_delivery_address(inv: Invoice) -> DeliveryAddress | None:
+    """The delivery address to print and send: None when absent or equal to the buyer's address."""
+    d, b = inv.delivery_address, inv.buyer
+    if d is None:
+        return None
+    if (
+        _same(d.street, b.street)
+        and _same(d.postcode, b.postcode)
+        and _same(d.city, b.city)
+        and _same(d.country, b.country)
+    ):
+        return None
+    return d
 
 
 def compute_totals(inv: Invoice) -> Totals:

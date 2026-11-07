@@ -9,12 +9,13 @@ from drafthorse.models.party import TaxRegistration
 from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.tradelines import LineItem
 
-from facturx_demo.model import Invoice, Party, compute_totals
+from facturx_demo.model import Invoice, Party, compute_totals, effective_delivery_address
 
 GUIDELINE_EN16931 = "urn:cen.eu:en16931:2017"
 SIREN_SCHEME = "0002"  # ISO 6523 code for SIREN/SIRET
 ENDPOINT_SCHEME = "0225"  # French electronic address scheme named in rule BR-FR-23
 TYPE_CODE_INVOICE = "380"
+VAT_ON_DEBITS_CODE = "5"  # BT-8 in CII: VAT due at invoice issue (option for payment on debits)
 
 
 def _fill_party(target, party: Party) -> None:
@@ -63,6 +64,15 @@ def build_cii_xml(inv: Invoice) -> bytes:
 
     if inv.delivery_date:
         doc.trade.delivery.event.occurrence = inv.delivery_date
+    delivery = effective_delivery_address(inv)
+    if delivery is not None:
+        ship_to = doc.trade.delivery.ship_to
+        if delivery.name:
+            ship_to.name = delivery.name
+        ship_to.address.line_one = delivery.street
+        ship_to.address.postcode = delivery.postcode
+        ship_to.address.city_name = delivery.city
+        ship_to.address.country_id = delivery.country
 
     settlement = doc.trade.settlement
     settlement.currency_code = inv.currency
@@ -73,6 +83,8 @@ def build_cii_xml(inv: Invoice) -> bytes:
         tax.basis_amount = breakdown.basis
         tax.category_code = "S"
         tax.rate_applicable_percent = breakdown.rate
+        if inv.vat_on_debits:
+            tax.due_date_type_code = VAT_ON_DEBITS_CODE
         settlement.trade_tax.add(tax)
 
     if inv.due_date or inv.payment_terms:

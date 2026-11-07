@@ -55,5 +55,13 @@
       "code": "AAB",
       "text": "Pas d’escompte pour paiement anticipé."
     }
-  ]
+  ],
+  "delivery_address": {
+    "name": "Boulangerie Les Délices - Laboratoire",
+    "street": "14 rue des Frères Lumière",
+    "postcode": "33700",
+    "city": "Mérignac",
+    "country": "FR"
+  },
+  "vat_on_debits": true
 }

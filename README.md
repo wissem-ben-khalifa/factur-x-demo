@@ -13,8 +13,8 @@ Démo publique : à partir des données d’une facture (entreprises **fictives*
 
 ### Ce que fait la démo
 
-1. Saisie d’une facture (ou chargement d’un exemple) : vendeur, acheteur, lignes, TVA, dates, mentions légales.
-2. Contrôle des données avant génération : SIREN (clé de contrôle), n° de TVA, adresse de l’acheteur, mentions PMT/PMD/AAB, adresses électroniques, taux de TVA, dates. Les erreurs sont affichées en français et en anglais.
+1. Saisie d’une facture (ou chargement d’un exemple) : vendeur, acheteur, lignes, TVA, dates, mentions légales, adresse de livraison si elle diffère, option de paiement de la TVA d’après les débits.
+2. Contrôle des données avant génération : SIREN (clé de contrôle), n° de TVA, adresses de l’acheteur et de livraison, mentions PMT/PMD/AAB, adresses électroniques, taux de TVA, dates. Les erreurs sont affichées en français et en anglais.
 3. Génération du XML CII EN 16931 et du PDF Factur-X (PDF/A-3).
 4. Validation par Mustang et KoSIT, avec le rapport affiché.
 5. Téléchargement du PDF et du XML.
@@ -48,7 +48,7 @@ Tests : `uv run pytest` (les tests qui ont besoin de Docker sont ignorés si Doc
 
 - Démo uniquement : pas de comptes, pas de paiement, pas de réception de factures, pas d’avoirs, pas d’envoi à une plateforme agréée.
 - Taux de TVA gérés : 20, 10, 5,5 et 2,1 %. La liste officielle est plus large.
-- Deux mentions obligatoires ne sont pas encore gérées : l’adresse de livraison si elle diffère, et l’option de paiement de la TVA sur les débits.
+- L’option de paiement de la TVA d’après les débits est transmise dans le champ BT-8 (code 5 en CII). Cette correspondance reste à confirmer avec la table officielle de la DGFiP (« correspondance des flux de données »).
 - Les adresses électroniques et les mentions légales des exemples sont fictives. Ce n’est pas un conseil juridique ou fiscal : vérifiez les règles sur impots.gouv.fr et economie.gouv.fr.
 
 ### Contact
@@ -66,8 +66,8 @@ A public demo: from invoice data (**fictional** companies) it produces a **Factu
 
 ### What it does
 
-1. Enter an invoice (or load a sample): seller, buyer, lines, VAT, dates, legal notes.
-2. Checks the data before generating: SIREN (check digit), VAT number, buyer address, PMT/PMD/AAB notes, electronic addresses, VAT rates, dates. Errors are shown in French and English.
+1. Enter an invoice (or load a sample): seller, buyer, lines, VAT, dates, legal notes, delivery address if different, VAT-on-debits option.
+2. Checks the data before generating: SIREN (check digit), VAT number, buyer and delivery addresses, PMT/PMD/AAB notes, electronic addresses, VAT rates, dates. Errors are shown in French and English.
 3. Generates the EN 16931 CII XML and the Factur-X PDF (PDF/A-3).
 4. Validates with Mustang and KoSIT and shows the report.
 5. Download the PDF and the XML.
@@ -101,7 +101,7 @@ Tests: `uv run pytest` (tests that need Docker are skipped when Docker is missin
 
 - Demo only: no accounts, no payments, no receiving invoices, no credit notes, no sending to an approved platform.
 - Supported VAT rates: 20, 10, 5.5 and 2.1 %. The official list is wider.
-- Two mandatory mentions are not handled yet: the delivery address when it differs, and the VAT-on-debits option.
+- The VAT-on-debits option is sent in field BT-8 (code 5 in CII). This mapping is still to be confirmed against the official DGFiP data-correspondence table.
 - The electronic addresses and legal notes in the samples are fictional. This is not legal or tax advice: check the rules on impots.gouv.fr and economie.gouv.fr.
 
 ### Contact

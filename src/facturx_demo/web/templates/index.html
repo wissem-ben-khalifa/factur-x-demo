@@ -55,10 +55,25 @@
         </select></div>
       {{ field("payment_terms", "Conditions de paiement / Payment terms") }}
     </div>
+    <label class="check"><input type="checkbox" name="vat_on_debits" value="on"
+      {% if form.get("vat_on_debits") %}checked{% endif %}>
+      Option pour le paiement de la TVA d’après les débits / VAT paid on debits option</label>
   </section>
 
   {{ party("seller", "Vendeur / Seller") }}
   {{ party("buyer", "Acheteur / Buyer") }}
+
+  <section>
+    <h2>Adresse de livraison / Delivery address</h2>
+    <p class="sub" style="margin:0 0 10px">À remplir seulement si elle diffère de celle de l’acheteur. Fill in only if it differs from the buyer's address.</p>
+    <div class="grid">
+      {{ field("delivery_name", "Nom du lieu / Site name") }}
+      {{ field("delivery_street", "Rue / Street") }}
+      {{ field("delivery_postcode", "Code postal / Postcode") }}
+      {{ field("delivery_city", "Ville / City") }}
+      {{ field("delivery_country", "Pays (2 lettres) / Country (2 letters)") }}
+    </div>
+  </section>
 
   <section>
     <h2>Lignes / Lines</h2>
