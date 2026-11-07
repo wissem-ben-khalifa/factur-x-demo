@@ -1,0 +1,27 @@
+[project]
+name = "facturx-demo"
+version = "0.1.0"
+description = "Generate and validate French Factur-X e-invoices (PDF/A-3 + CII XML) for fictional companies."
+authors = [
+    { name = "wissem-ben-khalifa", email = "189303265+wissem-ben-khalifa@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "drafthorse==2025.2.0",
+    "factur-x==7.9",
+    "pydantic>=2.14.3",
+    "python-stdnum>=2.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["validators: needs Docker and the facturx-validators image"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]

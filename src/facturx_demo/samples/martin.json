@@ -1,0 +1,31 @@
+{
+  "number": "F-2027-0042",
+  "issue_date": "2027-09-15",
+  "due_date": "2027-10-15",
+  "delivery_date": "2027-09-12",
+  "currency": "EUR",
+  "operation_category": "services",
+  "payment_terms": "Paiement à 30 jours",
+  "seller": {
+    "name": "Plomberie Martin",
+    "siren": "000100008",
+    "vat_id": "FR15000100008",
+    "street": "12 rue de l’Église",
+    "postcode": "69003",
+    "city": "Lyon",
+    "country": "FR"
+  },
+  "buyer": {
+    "name": "Restaurant Le Soleil",
+    "siren": "000100016",
+    "vat_id": "FR39000100016",
+    "street": "5 place des Terreaux",
+    "postcode": "69001",
+    "city": "Lyon",
+    "country": "FR"
+  },
+  "lines": [
+    {"description": "Main d’œuvre plomberie", "quantity": "3", "unit_code": "HUR", "unit_price": "80.00", "vat_rate": "20"},
+    {"description": "Tuyau cuivre 22 mm", "quantity": "1", "unit_code": "C62", "unit_price": "60.00", "vat_rate": "20"}
+  ]
+}
