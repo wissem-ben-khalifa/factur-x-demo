@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from drafthorse.models.accounting import ApplicableTradeTax
 from drafthorse.models.document import Document
+from drafthorse.models.note import IncludedNote
 from drafthorse.models.party import TaxRegistration
 from drafthorse.models.payment import PaymentTerms
 from drafthorse.models.tradelines import LineItem
@@ -12,6 +13,7 @@ from facturx_demo.model import Invoice, Party, compute_totals
 
 GUIDELINE_EN16931 = "urn:cen.eu:en16931:2017"
 SIREN_SCHEME = "0002"  # ISO 6523 code for SIREN/SIRET
+ENDPOINT_SCHEME = "0225"  # French electronic address scheme named in rule BR-FR-23
 TYPE_CODE_INVOICE = "380"
 
 
@@ -23,6 +25,8 @@ def _fill_party(target, party: Party) -> None:
     target.address.postcode = party.postcode
     target.address.city_name = party.city
     target.address.country_id = party.country
+    if party.endpoint_id:
+        target.electronic_address.uri_ID = (ENDPOINT_SCHEME, party.endpoint_id)
     if party.vat_id:
         reg = TaxRegistration()
         reg.id = ("VA", party.vat_id)
@@ -36,6 +40,11 @@ def build_cii_xml(inv: Invoice) -> bytes:
     doc.header.id = inv.number
     doc.header.type_code = TYPE_CODE_INVOICE
     doc.header.issue_date_time = inv.issue_date
+    for note in inv.notes:
+        included = IncludedNote()
+        included.content = note.text
+        included.subject_code = note.code
+        doc.header.notes.add(included)
 
     for index, (line, net) in enumerate(zip(inv.lines, totals.line_nets), start=1):
         item = LineItem()

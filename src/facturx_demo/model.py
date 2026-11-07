@@ -23,6 +23,9 @@ class Party(BaseModel):
     city: str
     country: str = "FR"
     email: str | None = None
+    # French electronic address (BT-34 seller / BT-49 buyer), scheme 0225. In real life the
+    # approved platform assigns it; here it is a fictional value.
+    endpoint_id: str | None = None
 
 
 class InvoiceLine(BaseModel):
@@ -31,6 +34,16 @@ class InvoiceLine(BaseModel):
     unit_code: str  # HUR = hours, C62 = unit
     unit_price: Decimal  # excl. VAT
     vat_rate: Decimal  # percent, e.g. 20
+
+
+class InvoiceNote(BaseModel):
+    """Mandatory French legal note (BR-FR-05): PMT recovery fees, PMD late penalties, AAB discount."""
+
+    code: Literal["PMT", "PMD", "AAB"]
+    text: str
+
+
+REQUIRED_NOTE_CODES = ("PMT", "PMD", "AAB")
 
 
 class Invoice(BaseModel):
@@ -44,6 +57,7 @@ class Invoice(BaseModel):
     lines: list[InvoiceLine]
     operation_category: Literal["goods", "services", "mixed"]
     payment_terms: str | None = None
+    notes: list[InvoiceNote] = []
 
 
 class VatBreakdown(BaseModel):

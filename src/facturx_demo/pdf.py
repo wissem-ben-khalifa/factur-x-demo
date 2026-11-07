@@ -130,6 +130,11 @@ def render_invoice_pdf(inv: Invoice) -> bytes:
     pdf.set_font(FONT, "", 9)
     if inv.payment_terms:
         pdf.cell(0, 5, inv.payment_terms, new_x="LMARGIN", new_y="NEXT")
+    if inv.notes:
+        pdf.ln(3)
+        pdf.set_font(FONT, "", 8)
+        for note in inv.notes:
+            pdf.multi_cell(0, 4, note.text, new_x="LMARGIN", new_y="NEXT")
 
     return bytes(pdf.output())
 

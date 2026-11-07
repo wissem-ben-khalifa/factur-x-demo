@@ -13,7 +13,8 @@
     "street": "12 rue de l’Église",
     "postcode": "69003",
     "city": "Lyon",
-    "country": "FR"
+    "country": "FR",
+    "endpoint_id": "plomberie-martin-demo"
   },
   "buyer": {
     "name": "Restaurant Le Soleil",
@@ -22,10 +23,37 @@
     "street": "5 place des Terreaux",
     "postcode": "69001",
     "city": "Lyon",
-    "country": "FR"
+    "country": "FR",
+    "endpoint_id": "restaurant-le-soleil-demo"
   },
   "lines": [
-    {"description": "Main d’œuvre plomberie", "quantity": "3", "unit_code": "HUR", "unit_price": "80.00", "vat_rate": "20"},
-    {"description": "Tuyau cuivre 22 mm", "quantity": "1", "unit_code": "C62", "unit_price": "60.00", "vat_rate": "20"}
+    {
+      "description": "Main d’œuvre plomberie",
+      "quantity": "3",
+      "unit_code": "HUR",
+      "unit_price": "80.00",
+      "vat_rate": "20"
+    },
+    {
+      "description": "Tuyau cuivre 22 mm",
+      "quantity": "1",
+      "unit_code": "C62",
+      "unit_price": "60.00",
+      "vat_rate": "20"
+    }
+  ],
+  "notes": [
+    {
+      "code": "PMT",
+      "text": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €."
+    },
+    {
+      "code": "PMD",
+      "text": "En cas de retard de paiement, une pénalité égale à trois fois le taux d’intérêt légal sera appliquée."
+    },
+    {
+      "code": "AAB",
+      "text": "Pas d’escompte pour paiement anticipé."
+    }
   ]
 }

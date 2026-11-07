@@ -85,3 +85,13 @@ def test_three_decimal_price_passes_kosit_and_mustang():
     pdf, xml = generate(_three_decimal_invoice())
     assert run_kosit(xml).ok
     assert run_mustang(pdf).ok
+
+
+@pytest.mark.validators
+@pytest.mark.parametrize("name", ["martin", "multi_rate"])
+def test_samples_have_no_french_rule_findings(name):
+    """Mustang bundles the official French BR-FR rules (Flux 2 V1.3.0): no warning left."""
+    pdf, xml = generate(load_sample(name))
+    for report in (run_mustang(pdf), run_kosit(xml)):
+        assert report.ok
+        assert [f.rule_id for f in report.findings if f.rule_id.startswith("BR-FR")] == []
