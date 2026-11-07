@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Factur-X demo{% endblock %}
+{% macro field(name, label, type="text", required=false) -%}
+  <div><label for="{{ name }}">{{ label }}</label>
+  <input id="{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ form.get(name, '') }}"></div>
+{%- endmacro %}
+{% macro party(side, title) %}
+  <section>
+    <h2>{{ title }}</h2>
+    <div class="grid">
+      {{ field(side ~ "_name", "Nom / Name") }}
+      {{ field(side ~ "_siren", "SIREN (9 chiffres / digits)") }}
+      {{ field(side ~ "_vat_id", "N° TVA / VAT ID") }}
+      {{ field(side ~ "_street", "Rue / Street") }}
+      {{ field(side ~ "_postcode", "Code postal / Postcode") }}
+      {{ field(side ~ "_city", "Ville / City") }}
+      {{ field(side ~ "_endpoint_id", "Adresse électronique / Electronic address") }}
+    </div>
+  </section>
+{% endmacro %}
+{% block content %}
+<h1>Factur-X : facture électronique / e-invoice</h1>
+<p class="sub">Saisissez une facture, obtenez un PDF Factur-X (PDF/A-3 + XML EN 16931) et le rapport de validation.
+  Enter an invoice, get a Factur-X PDF (PDF/A-3 + EN 16931 XML) and the validation report.</p>
+<p class="samples">Exemples / Samples :
+  {% for s in samples %}<a href="/?sample={{ s }}">{{ s }}</a>{% endfor %}
+  <a href="/">vide / blank</a></p>
+
+{% if issues %}
+<section class="issues" role="alert">
+  <h2>{{ issues|length }} problème(s) à corriger / problem(s) to fix</h2>
+  <ul>
+    {% for issue in issues %}
+    <li><strong>{{ issue.message_fr }}</strong>
+      <span class="en">{{ issue.message_en }}</span>
+      <code>{{ issue.code }}{% if issue.field %} · {{ issue.field }}{% endif %}</code></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<form method="post" action="/generate">
+  <section>
+    <h2>Facture / Invoice</h2>
+    <div class="grid">
+      {{ field("number", "Numéro / Number") }}
+      {{ field("issue_date", "Date d’émission / Issue date", "date") }}
+      {{ field("due_date", "Échéance / Due date", "date") }}
+      {{ field("delivery_date", "Livraison / Delivery date", "date") }}
+      <div><label for="operation_category">Nature de l’opération / Nature of operation</label>
+        <select id="operation_category" name="operation_category">
+          {% for value, text in [("services", "Prestation de services / Services"), ("goods", "Livraison de biens / Goods"), ("mixed", "Biens et services / Both")] %}
+          <option value="{{ value }}" {% if form.get("operation_category") == value %}selected{% endif %}>{{ text }}</option>
+          {% endfor %}
+        </select></div>
+      {{ field("payment_terms", "Conditions de paiement / Payment terms") }}
+    </div>
+  </section>
+
+  {{ party("seller", "Vendeur / Seller") }}
+  {{ party("buyer", "Acheteur / Buyer") }}
+
+  <section>
+    <h2>Lignes / Lines</h2>
+    <table>
+      <tr><th>Désignation / Description</th><th>Qté / Qty</th><th>Unité / Unit</th>
+        <th>Prix HT / Price excl. VAT</th><th>TVA % / VAT</th></tr>
+      {% for i in lines %}
+      <tr>
+        <td><input name="line_{{ i }}_description" value="{{ form.get('line_' ~ i ~ '_description', '') }}" aria-label="Description {{ i }}"></td>
+        <td><input name="line_{{ i }}_quantity" value="{{ form.get('line_' ~ i ~ '_quantity', '') }}" size="5" aria-label="Quantité {{ i }}"></td>
+        <td><select name="line_{{ i }}_unit_code" aria-label="Unité {{ i }}">
+          {% for value, text in [("HUR", "heure / hour"), ("C62", "unité / unit")] %}
+          <option value="{{ value }}" {% if form.get('line_' ~ i ~ '_unit_code') == value %}selected{% endif %}>{{ text }}</option>
+          {% endfor %}</select></td>
+        <td><input name="line_{{ i }}_unit_price" value="{{ form.get('line_' ~ i ~ '_unit_price', '') }}" size="8" aria-label="Prix {{ i }}"></td>
+        <td><select name="line_{{ i }}_vat_rate" aria-label="TVA {{ i }}">
+          {% for value in ["20", "10", "5.5", "2.1"] %}
+          <option value="{{ value }}" {% if form.get('line_' ~ i ~ '_vat_rate') == value %}selected{% endif %}>{{ value }}</option>
+          {% endfor %}</select></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section>
+    <h2>Mentions légales / Legal notes</h2>
+    {% for code, label in [("PMT", "PMT : frais de recouvrement / recovery fees"), ("PMD", "PMD : pénalités de retard / late-payment penalties"), ("AAB", "AAB : escompte / discount terms")] %}
+    <div style="margin-bottom:10px"><label for="note_{{ code }}">{{ label }}</label>
+      <textarea id="note_{{ code }}" name="note_{{ code }}">{{ form.get("note_" ~ code, "") }}</textarea></div>
+    {% endfor %}
+  </section>
+
+  <button class="btn" type="submit">Générer et valider / Generate and validate</button>
+</form>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Facture {{ invoice.number }} · Factur-X demo{% endblock %}
+{% block content %}
+<h1>Facture {{ invoice.number }} générée / generated</h1>
+<p class="sub">{{ invoice.seller.name }} → {{ invoice.buyer.name }}</p>
+
+<section>
+  <h2>Téléchargements / Downloads</h2>
+  <div class="row">
+    <a class="btn" href="/download/{{ invoice_id }}/factur-x.pdf">PDF Factur-X (PDF/A-3)</a>
+    <a class="btn secondary" href="/download/{{ invoice_id }}/factur-x.xml">XML EN 16931</a>
+    <a class="btn secondary" href="/">Nouvelle facture / New invoice</a>
+  </div>
+</section>
+
+<section>
+  <h2>Validation</h2>
+  {% if unavailable == "docker" %}
+    <p><span class="badge warn">Validation indisponible / Validation unavailable</span></p>
+    <p>Docker n’est pas démarré ou l’image des validateurs est absente. Les fichiers restent téléchargeables.
+      Docker is not running or the validator image is missing. The files can still be downloaded.</p>
+  {% elif unavailable %}
+    <p><span class="badge warn">Validation indisponible / Validation unavailable</span></p>
+    <p>Les validateurs ont échoué à s’exécuter. The validators failed to run.</p>
+  {% else %}
+    {% for report in reports %}
+    <div class="card">
+      <div class="row">
+        <strong>{{ "KoSIT (EN 16931)" if report.tool == "kosit" else "Mustang (Factur-X + PDF/A-3 + règles FR / FR rules)" }}</strong>
+        {% if report.ok %}<span class="badge ok">valide / valid</span>
+        {% else %}<span class="badge bad">invalide / invalid</span>{% endif %}
+      </div>
+      {% for finding in report.findings %}
+      <div class="finding {{ finding.severity }}">
+        <code>{{ finding.rule_id }} · {{ finding.severity }}</code><br>{{ finding.message }}
+      </div>
+      {% else %}
+      <p class="sub">Aucune erreur ni avertissement / No errors or warnings.</p>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  {% endif %}
+</section>
+{% endblock %}
