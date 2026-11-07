@@ -30,6 +30,14 @@ def fr_number(value: Decimal) -> str:
     return text.replace(",", " ").replace(".", ",")
 
 
+def fr_price(value: Decimal) -> str:
+    """Unit price with its real decimals (at least 2): 66.667 -> '66,667', 80 -> '80,00'."""
+    exponent = value.normalize().as_tuple().exponent
+    places = max(2, -exponent if isinstance(exponent, int) else 2)
+    text = f"{value:,.{places}f}"
+    return text.replace(",", " ").replace(".", ",")
+
+
 def fr_date(d) -> str:
     return d.strftime("%d/%m/%Y")
 
@@ -103,7 +111,7 @@ def render_invoice_pdf(inv: Invoice) -> bytes:
     pdf.set_font(FONT, "", 9)
     for line, net in zip(inv.lines, totals.line_nets):
         qty = f"{line.quantity.normalize():f} {UNIT_FR.get(line.unit_code, line.unit_code)}"
-        cells = [line.description, qty, fr_number(line.unit_price), f"{line.vat_rate.normalize():f} %", fr_number(net)]
+        cells = [line.description, qty, fr_price(line.unit_price), f"{line.vat_rate.normalize():f} %", fr_number(net)]
         for w, text, head in zip(widths, cells, heads):
             pdf.cell(w, 7, text, border=1, align="L" if head == "Désignation" else "R")
         pdf.ln()

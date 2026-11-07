@@ -1,0 +1,31 @@
+{
+  "number": "F-2027-0108",
+  "issue_date": "2027-10-04",
+  "due_date": "2027-11-03",
+  "delivery_date": "2027-10-01",
+  "currency": "EUR",
+  "operation_category": "mixed",
+  "payment_terms": "Paiement à 30 jours",
+  "seller": {
+    "name": "Atelier Dupré Électricité",
+    "siren": "000100040",
+    "vat_id": "FR14000100040",
+    "street": "8 avenue de la République",
+    "postcode": "33000",
+    "city": "Bordeaux",
+    "country": "FR"
+  },
+  "buyer": {
+    "name": "Boulangerie Les Délices",
+    "siren": "000100057",
+    "vat_id": "FR65000100057",
+    "street": "21 rue Sainte-Catherine",
+    "postcode": "33000",
+    "city": "Bordeaux",
+    "country": "FR"
+  },
+  "lines": [
+    {"description": "Tableau électrique modulaire", "quantity": "2", "unit_code": "C62", "unit_price": "150.00", "vat_rate": "20"},
+    {"description": "Mise aux normes (rénovation, logement ancien)", "quantity": "1", "unit_code": "C62", "unit_price": "99.99", "vat_rate": "10"}
+  ]
+}
