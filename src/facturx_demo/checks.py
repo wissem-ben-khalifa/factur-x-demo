@@ -9,7 +9,11 @@ Sources (checked 2026-11-07):
   BR-FR-05 (notes PMT, PMD, AAB), BR-FR-10/11 (SIREN), BR-FR-12/13 (electronic addresses),
   BR-FR-CO-07 (due date), BR-FR-16 (allowed VAT rates).
 Delivery address (when different) is checked for completeness; the VAT-on-debits option is a
-yes/no choice of the seller, mapped to BT-8 (DGFiP data table + Vertex reference, Nov 2026).
+yes/no choice of the seller, sent in BT-8. Field mapping confirmed in the official DGFiP table
+"données de facture à transmettre à l'administration, correspondance flux" (impots.gouv.fr, MAJ août 2026):
+VAT on debits -> BT-8, delivery address -> BT-75 to BT-80, nature of the operation -> BT-23.
+The table gives no code values; BT-8 = 5 (CII) comes from Vertex's France reference and the
+ZUGFeRD convention, and BT-23 = B1/S1/M1 from the allowed values of rule BR-FR-08.
 """
 
 import re

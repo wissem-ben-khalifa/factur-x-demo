@@ -48,7 +48,7 @@ Tests : `uv run pytest` (les tests qui ont besoin de Docker sont ignorés si Doc
 
 - Démo uniquement : pas de comptes, pas de paiement, pas de réception de factures, pas d’avoirs, pas d’envoi à une plateforme agréée.
 - Taux de TVA gérés : 20, 10, 5,5 et 2,1 %. La liste officielle est plus large.
-- L’option de paiement de la TVA d’après les débits est transmise dans le champ BT-8 (code 5 en CII). Cette correspondance reste à confirmer avec la table officielle de la DGFiP (« correspondance des flux de données »).
+- L’option de paiement de la TVA d’après les débits est transmise dans le champ BT-8 (code 5 en CII). Le champ BT-8 est confirmé par la table officielle de la DGFiP (impots.gouv.fr, mise à jour août 2026) ; la valeur du code (5) n’y figure pas et reste à confirmer. La nature de l’opération est transmise dans BT-23 (B1, S1 ou M1).
 - Les adresses électroniques et les mentions légales des exemples sont fictives. Ce n’est pas un conseil juridique ou fiscal : vérifiez les règles sur impots.gouv.fr et economie.gouv.fr.
 
 ### Contact
@@ -101,7 +101,7 @@ Tests: `uv run pytest` (tests that need Docker are skipped when Docker is missin
 
 - Demo only: no accounts, no payments, no receiving invoices, no credit notes, no sending to an approved platform.
 - Supported VAT rates: 20, 10, 5.5 and 2.1 %. The official list is wider.
-- The VAT-on-debits option is sent in field BT-8 (code 5 in CII). This mapping is still to be confirmed against the official DGFiP data-correspondence table.
+- The VAT-on-debits option is sent in field BT-8 (code 5 in CII). Field BT-8 is confirmed by the official DGFiP table (impots.gouv.fr, updated August 2026); the code value (5) is not listed there and still needs confirming. The nature of the operation is sent in BT-23 (B1, S1 or M1).
 - The electronic addresses and legal notes in the samples are fictional. This is not legal or tax advice: check the rules on impots.gouv.fr and economie.gouv.fr.
 
 ### Contact

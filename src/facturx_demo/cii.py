@@ -15,6 +15,9 @@ GUIDELINE_EN16931 = "urn:cen.eu:en16931:2017"
 SIREN_SCHEME = "0002"  # ISO 6523 code for SIREN/SIRET
 ENDPOINT_SCHEME = "0225"  # French electronic address scheme named in rule BR-FR-23
 TYPE_CODE_INVOICE = "380"
+# BT-23 "cadre de facturation" (DGFiP table: nature of the operation). Letter = goods / services /
+# both; digit 1 = plain invoice to be paid. Allowed values are listed in rule BR-FR-08.
+BILLING_FRAMEWORK = {"goods": "B1", "services": "S1", "mixed": "M1"}
 VAT_ON_DEBITS_CODE = "5"  # BT-8 in CII: VAT due at invoice issue (option for payment on debits)
 
 
@@ -37,6 +40,7 @@ def _fill_party(target, party: Party) -> None:
 def build_cii_xml(inv: Invoice) -> bytes:
     totals = compute_totals(inv)
     doc = Document()
+    doc.context.business_parameter.id = BILLING_FRAMEWORK[inv.operation_category]
     doc.context.guideline_parameter.id = GUIDELINE_EN16931
     doc.header.id = inv.number
     doc.header.type_code = TYPE_CODE_INVOICE

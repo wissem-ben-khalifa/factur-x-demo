@@ -219,3 +219,25 @@ def test_foreign_delivery_address_passes_validators():
     pdf, xml = generate(inv)
     assert run_kosit(xml).ok
     assert run_mustang(pdf).ok
+
+
+# ---- nature of the operation (BT-23, billing framework) ----------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("category", "code"), [("goods", "B1"), ("services", "S1"), ("mixed", "M1")]
+)
+def test_operation_category_is_sent_as_bt23(category, code):
+    root = _xml(_martin(operation_category=category))
+    path = "//rsm:ExchangedDocumentContext/ram:BusinessProcessSpecifiedDocumentContextParameter/ram:ID"
+    ns = NS | {"rsm": "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"}
+    assert root.xpath(f"string({path})", namespaces=ns) == code
+
+
+@pytest.mark.validators
+@pytest.mark.parametrize("category", ["goods", "services", "mixed"])
+def test_each_operation_category_passes_kosit_and_mustang(category):
+    pdf, xml = generate(_martin(operation_category=category))
+    for report in (run_kosit(xml), run_mustang(pdf)):
+        assert report.ok, report.findings
+        assert report.findings == []
