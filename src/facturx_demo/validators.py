@@ -141,8 +141,12 @@ def run_mustang(data: bytes) -> Report:
     raw = stdout[start : end + len("</validation>")]
     findings = _parse_mustang(raw)
     root = etree.fromstring(raw.encode("utf-8"))
-    status = root.xpath("string(/validation/summary/@status)")
-    ok = status == "valid" and not any(f.severity == "error" for f in findings)
+    # Every section (pdf, xml, overall) must say "valid": Mustang's overall status can say
+    # "valid" while its PDF/A section says "invalid".
+    statuses = root.xpath("//summary/@status")
+    ok = bool(statuses) and all(s == "valid" for s in statuses) and not any(
+        f.severity == "error" for f in findings
+    )
     return Report(tool="mustang", ok=ok, findings=findings, raw=raw)
 
 
@@ -154,9 +158,35 @@ def _mustang_rule_id(text: str, error_type: str) -> str:
     return f"MUSTANG-{error_type}"
 
 
+PDFA_FAILED = re.compile(
+    r"TestAssertion \[ruleId=RuleId \[specification=(?P<spec>[^,]*), clause=(?P<clause>[^,]*), "
+    r"testNumber=(?P<test>\d+)\], status=failed, message=(?P<message>.*?), location=Location"
+)
+
+
+def _parse_pdfa(text: str) -> list[Finding]:
+    """The <pdf> section is a veraPDF dump as plain text: one Finding per failed rule."""
+    counts: dict[tuple[str, str, str], int] = {}
+    messages: dict[tuple[str, str, str], str] = {}
+    for m in PDFA_FAILED.finditer(text):
+        key = (m["spec"], m["clause"], m["test"])
+        counts[key] = counts.get(key, 0) + 1
+        messages.setdefault(key, m["message"])
+    return [
+        Finding(
+            rule_id=f"PDFA-{clause}-{test}",
+            severity="error",
+            message=f"{spec}: {messages[(spec, clause, test)]} ({n}x)",
+        )
+        for (spec, clause, test), n in counts.items()
+    ]
+
+
 def _parse_mustang(raw: str) -> list[Finding]:
     root = etree.fromstring(raw.encode("utf-8"))
     findings: list[Finding] = []
+    for pdf_el in root.xpath("/validation/pdf"):
+        findings.extend(_parse_pdfa(pdf_el.text or ""))
     for el in root.xpath("//error | //warning"):
         text = " ".join("".join(el.itertext()).split())
         findings.append(
